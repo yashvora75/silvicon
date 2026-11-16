@@ -58,6 +58,6 @@ cursor glow. Respects `prefers-reduced-motion`.
 
 ## Hero, globe, services
 - Hero: animated growth line chart (`js/hero-chart.js`, Canvas 2D) drawing bottom-left to top-right with light travelling along it; works on mobile.
-- Globe: rippling particle sphere, comet-trail arcs between cities, pulse rings, orbiting coins.
+- Globe: one centred full-bleed gold particle globe with a single ring; rotation only (slow idle, spins fast while scrolling); content sits on top.
 - Services: pinned half-circle wheel on desktop (>=1000px), scroll rotates cards; stacked cards on smaller screens.
 - Why / CTA: multi-layer parallax.
