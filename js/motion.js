@@ -71,7 +71,7 @@ if (reduce || !gsap || !ScrollTrigger) {
       y: 56, opacity: 0, scale: .97, duration: 1, ease: 'power3.out', stagger: .12, clearProps: 'transform,opacity', ...vars
     })
   });
-  if (innerWidth < 1000 || reduce) stagger('.service-card'); stagger('.why-grid article', { scale: 1 }); stagger('.universe-list li', { y: 24, scale: 1, stagger: .1 });
+  if (reduce) stagger('.service-card'); stagger('.why-grid article', { scale: 1 }); stagger('.universe-list li', { y: 24, scale: 1, stagger: .1 });
 
   /* ---------- hero entrance (after the intro settles) ---------- */
   let heroDone = false;
@@ -209,7 +209,7 @@ if (reduce || !gsap || !ScrollTrigger) {
     });
 
     /* 3D tilt + spotlight on service cards */
-    if (innerWidth < 1000) $('.service-card').forEach(card => {
+    if (false) $('.service-card').forEach(card => {
       const rx = gsap.quickTo(card, 'rotationX', { duration: .6, ease: 'power3' });
       const ry = gsap.quickTo(card, 'rotationY', { duration: .6, ease: 'power3' });
       gsap.set(card, { transformPerspective: 900 });
@@ -228,18 +228,18 @@ if (reduce || !gsap || !ScrollTrigger) {
     const grid = document.querySelector('.service-grid'), cards = $('.service-card');
     if (grid && cards.length && !reduce) {
       const mmArc = gsap.matchMedia();
-      mmArc.add('(min-width: 1000px)', () => {
+      mmArc.add('(min-width: 1px)', () => {
         const section = document.querySelector('#services'), n = cards.length;
         section.classList.add('arc-on'); grid.classList.add('service-arc');
         const state = { p: 0 };
         const place = () => {
-          const R = Math.min(innerWidth * .62, 980), step = 34;
+          const cw = Math.min(460, innerWidth * (innerWidth < 700 ? .8 : .38)), R = innerWidth < 700 ? cw * .5 : Math.max(cw * 1.55, Math.min(innerWidth * .5, 760)), step = innerWidth < 700 ? 22 : 27;
           cards.forEach((c, i) => {
             const th = (i - state.p * (n - 1)) * step, rad = th * Math.PI / 180, a = Math.abs(th);
-            const hide = a > 78;
+            const hide = a > 62;
             gsap.set(c, {
-              x: Math.sin(rad) * R, y: (1 - Math.cos(rad)) * R * .72, rotation: th * .9, scale: 1 - Math.min(a, 70) / 70 * .22,
-              opacity: hide ? 0 : 1 - Math.min(a, 78) / 78 * .85, zIndex: 100 - Math.round(a), pointerEvents: a < 18 ? 'auto' : 'none', force3D: true
+              x: Math.sin(rad) * R, y: (1 - Math.cos(rad)) * R * .6, rotation: th * .9, scale: 1 - Math.min(a, 70) / 70 * .22,
+              opacity: hide ? 0 : 1 - Math.min(a, 62) / 62 * .8, zIndex: 100 - Math.round(a), pointerEvents: a < 18 ? 'auto' : 'none', force3D: true
             });
             c.classList.toggle('is-active', a < 18);
           });

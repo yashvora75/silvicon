@@ -94,3 +94,20 @@ form.addEventListener('submit', e => {
   form.reset();
   fields.forEach(f => { const i = document.getElementById(f.id); i.removeAttribute('aria-invalid'); i.removeAttribute('aria-describedby'); });
 });
+
+
+/* Why-us carousel controls (shown under 1000px, where the cards become a swipeable carousel) */
+(() => {
+  const grid = document.querySelector('.why-grid'); if (!grid) return;
+  const cards = [...grid.children], nav = document.createElement('div'); nav.className = 'why-nav';
+  nav.innerHTML = '<button type="button" class="why-prev" aria-label="Previous">←</button><div class="why-dots"></div><button type="button" class="why-next" aria-label="Next">→</button>';
+  grid.after(nav);
+  const dots = nav.querySelector('.why-dots');
+  cards.forEach((c, i) => { const d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Card ' + (i + 1)); d.addEventListener('click', () => go(i)); dots.append(d); });
+  const idx = () => Math.round(grid.scrollLeft / (cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1));
+  const go = i => grid.scrollTo({ left: cards[Math.max(0, Math.min(cards.length - 1, i))].offsetLeft - cards[0].offsetLeft, behavior: 'smooth' });
+  const sync = () => [...dots.children].forEach((d, i) => d.classList.toggle('on', i === idx()));
+  nav.querySelector('.why-prev').addEventListener('click', () => go(idx() - 1));
+  nav.querySelector('.why-next').addEventListener('click', () => go(idx() + 1));
+  grid.addEventListener('scroll', sync, { passive: true }); sync();
+})();
