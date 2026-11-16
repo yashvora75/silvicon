@@ -54,3 +54,7 @@ cursor glow. Respects `prefers-reduced-motion`.
 - Replace the extracted logo crops with an approved standalone logo (original poster kept in `assets/logo/`).
 - The inquiry form validates locally and sends nothing; connect a form service/backend.
 - Contact details are intentionally not invented; copy needs client and legal review.
+
+
+## Hero
+The hero uses a 2D canvas "golden silk" ribbon (`js/hero-silk.js`) with three glowing markers (Clarity / Growth / Value) that bends away from the cursor. The globe, journey and CTA sections keep their Three.js scenes (`js/scene.js`).

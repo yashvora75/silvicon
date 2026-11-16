@@ -109,68 +109,6 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
 }
 
 /* ==========================================================================
-   1 · HERO — liquid-gold knot wrapped by an orbit of tumbling coins
-   ========================================================================== */
-{
-  const container = document.querySelector('.hero-visual');
-  if (container) {
-    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(38, 1, .1, 80);
-    camera.position.set(0, 0, 8.4);
-    const rig = lights(scene);
-
-    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(.82, .25, 380, 56, 2, 3), gold());
-    knot.scale.setScalar(1.5); scene.add(knot);
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTexture, color: 0xf3b862, transparent: true, opacity: .34, blending: THREE.AdditiveBlending, depthWrite: false }));
-    glow.scale.set(4.6, 4.6, 1); glow.position.z = -1.5; scene.add(glow);
-
-    const coinCount = mobile() ? 16 : 30;
-    const coins = new THREE.InstancedMesh(new THREE.CylinderGeometry(.15, .15, .034, 40), gold(), coinCount);
-    const coinData = [], coinGroup = new THREE.Group();
-    for (let i = 0; i < coinCount; i++) {
-      const a = i / coinCount * Math.PI * 2, s = Math.sin(i * 91.7) * 1e4, r1 = s - Math.floor(s);
-      coinData.push({ x: Math.cos(a) * (2.45 + r1 * .35), y: (r1 - .5) * .35, z: Math.sin(a) * (2.45 + r1 * .35), sp: .5 + r1 * 1.2, ph: r1 * 6.28 });
-    }
-    coinGroup.add(coins);
-    const track = halo(2.6, .3); track.rotation.x = Math.PI / 2; coinGroup.add(track);
-    const track2 = halo(2.95, .12); track2.rotation.x = Math.PI / 2; coinGroup.add(track2);
-    scene.add(coinGroup);
-
-    const sats = [1.9, 2.15].map((rad, i) => {
-      const g = new THREE.Group();
-      const m = new THREE.Mesh(new THREE.SphereGeometry(.055, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfff1c9 }));
-      const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTexture, color: 0xffd58a, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false }));
-      h.scale.set(.6, .6, 1); m.add(h); g.add(m); g.userData = { rad, m, i }; scene.add(g); return g;
-    });
-    const dust = motes(mobile() ? 50 : 110, 4.4, 1.7, .14); scene.add(dust);
-    const dummy = new THREE.Object3D();
-    let scroll = 0;
-    addEventListener('scroll', () => { scroll = clamp(scrollY / innerHeight); }, { passive: true });
-
-    create(document.getElementById('hero-canvas'), container, scene, camera, (dt, time) => {
-      const t = reduced ? 0 : time;
-      knot.rotation.set(.35 + pointer.y * .4 + t * .15, t * .27 + pointer.x * .7, 0);
-      coinGroup.rotation.set(1.2, t * .1, .2);
-      coinData.forEach((d, i) => {
-        dummy.position.set(d.x, d.y + Math.sin(t * d.sp + d.ph) * .05, d.z);
-        dummy.rotation.set(t * d.sp + d.ph, d.ph * 2, t * d.sp * .6);
-        dummy.updateMatrix(); coins.setMatrixAt(i, dummy.matrix);
-      });
-      coins.instanceMatrix.needsUpdate = true;
-      sats.forEach(g => {
-        const { rad, m, i } = g.userData, a = t * (.55 + i * .2) + i * 2;
-        m.position.set(Math.cos(a) * rad, Math.sin(a * 1.0) * rad * (.45 + i * .2), Math.sin(a) * .8);
-        g.rotation.z = .5 + i * .8;
-      });
-      dust.rotation.z = -t * .02;
-      rig.key.position.x = -3 + Math.sin(t * .7) * 2.2;
-      rig.rim.intensity = 55 + Math.sin(t * 1.1) * 12;
-      camera.position.z = (camera.aspect < 1.6 ? 11 : 8.4) - scroll * 1.4;
-      camera.lookAt(0, 0, 0);
-    });
-  }
-}
-
-/* ==========================================================================
    2 · JOURNEY — a scroll-driven flight through golden gates, past drifting
    coins, ending at a rising sun with a growth chart
    ========================================================================== */

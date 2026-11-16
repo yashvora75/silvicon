@@ -83,7 +83,8 @@ if (reduce || !gsap || !ScrollTrigger) {
     const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
     tl.to('.hero .mask>span', { yPercent: 0, duration: 1.3, stagger: .12, clearProps: 'transform' }, 0)
       .from('.hero .eyebrow', { opacity: 0, y: 14, duration: .9 }, 0)
-      .from('.hero-visual', { opacity: 0, scale: .9, duration: 1.8 }, .1)
+      .from('#hero-silk', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
+      .from('.hero-node > *', { opacity: 0, scale: .5, duration: 1.1, stagger: .22, ease: 'back.out(1.7)' }, 1.2)
       .from('.hero-end > *', { opacity: 0, y: 26, duration: 1, stagger: .1, clearProps: 'transform,opacity' }, .55);
     if (!played) tl.from('.header-inner', { opacity: 0, y: -24, duration: 1 }, .2).from('.hero-foot', { opacity: 0, duration: 1 }, 1.2);
   };
@@ -93,8 +94,7 @@ if (reduce || !gsap || !ScrollTrigger) {
 
   /* hero parallax on scroll */
   const heroScroll = { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true };
-  gsap.to('.hero-visual', { yPercent: -14, scale: 1.06, ease: 'none', scrollTrigger: heroScroll });
-  gsap.to('.hero-grid', { yPercent: 12, ease: 'none', scrollTrigger: heroScroll });
+  gsap.to('#hero-silk', { yPercent: -10, ease: 'none', scrollTrigger: heroScroll });
   gsap.to('.hero-glow', { yPercent: -18, opacity: .4, ease: 'none', scrollTrigger: heroScroll });
 
   /* ---------- journey: beat copy + dots ---------- */

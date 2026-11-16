@@ -33,6 +33,7 @@
 <script defer src="assets/vendor/lucide.min.js"></script>
 <script defer src="js/ui.js"></script>
 <script defer src="js/ambient.js"></script>
+<script defer src="js/hero-silk.js"></script>
 <script type="module" src="js/scene.js"></script>
 <script type="module" src="js/intro-animation.js"></script>
 <script type="module" src="js/motion.js"></script>
@@ -76,8 +77,11 @@
 
   <!-- HERO -->
   <section class="hero" id="home" data-ambient="dark" aria-labelledby="hero-heading">
-    <div class="hero-grid" aria-hidden="true"></div>
     <div class="hero-glow" aria-hidden="true"></div>
+    <canvas class="hero-silk" id="hero-silk" aria-hidden="true"></canvas>
+    <div class="hero-node" aria-hidden="true"><i></i><span>Clarity</span></div>
+    <div class="hero-node" aria-hidden="true"><i></i><span>Growth</span></div>
+    <div class="hero-node" aria-hidden="true"><i></i><span>Value</span></div>
     <div class="wrap hero-inner">
       <div class="hero-copy">
         <p class="eyebrow"><span class="line"></span>SILVICON FINANCIAL SERVICES LLP</p>
@@ -87,10 +91,7 @@
           <span class="mask"><span><em>Lasting Value.</em></span></span>
         </h1>
       </div>
-      <div class="hero-visual" aria-label="Interactive three-dimensional metallic gold ribbon sculpture" role="img">
-        <canvas id="hero-canvas" aria-hidden="true"></canvas>
-        <div class="hero-fallback" aria-hidden="true"><span></span><span></span><span></span></div>
-      </div>
+      <div class="hero-visual" aria-hidden="true"></div>
       <div class="hero-end">
         <p class="visual-label"><span class="visual-dot"></span>A PERSPECTIVE ON PROGRESS</p>
         <p class="lead">Thoughtful financial solutions for individuals, businesses, and growth companies — built around your ambitions.</p>
