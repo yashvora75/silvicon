@@ -20,7 +20,7 @@ function settle(played) {
   window.silviconIntroSettled = { played };
   document.dispatchEvent(new CustomEvent('silvicon:intro-settled', { detail: { played } }));
 }
-function hasPlayed() { try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; } }
+function hasPlayed() { return false; } // intro replays on every load of the home page
 function markPlayed() { try { sessionStorage.setItem(KEY, '1'); } catch {} }
 function createParticles() {
   if (!THREE) { fallback.style.opacity = '.6'; return null; }
