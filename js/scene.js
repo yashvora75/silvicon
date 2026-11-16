@@ -3,7 +3,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 /* ==========================================================================
    SILVICON 3D — four scenes share one toolkit:
-   hero ribbon · pinned journey · particle sphere · CTA ribbon
+   hero crystal · pinned journey · particle sphere · CTA ribbon
    Every renderer sleeps while off-screen and falls back to CSS if WebGL fails.
    ========================================================================== */
 
@@ -107,6 +107,55 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
     depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
   }));
 }
+
+/* ==========================================================================
+   1 · HERO — a faceted gold crystal wrapped by orbiting coin rings
+   ========================================================================== */
+(() => {
+  const canvas = document.getElementById('hero-3d'), host = document.querySelector('.hero');
+  if (!canvas || !host) return;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, .1, 60); camera.position.set(0, 0, 9);
+  lights(scene);
+  const rig = new THREE.Group(); scene.add(rig);
+  const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(.78, 0),
+    new THREE.MeshStandardMaterial({ color: 0xf2c66e, metalness: 1, roughness: .12, envMapIntensity: 2.4, flatShading: true }));
+  crystal.scale.y = 1.35; rig.add(crystal);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(.9, 0)),
+    new THREE.LineBasicMaterial({ color: 0xfff1c9, transparent: true, opacity: .55 }));
+  edges.scale.y = 1.35; rig.add(edges);
+  const rings = [];
+  [[1.35, .0, .5], [1.8, .6, -.35], [2.3, -.5, .25]].forEach(([r, tilt, spd], k) => {
+    const g = new THREE.Group(); g.rotation.x = Math.PI / 2 + tilt * .4; g.rotation.z = tilt;
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(r, .012, 6, 200),
+      new THREE.MeshBasicMaterial({ color: 0xf4d391, transparent: true, opacity: .45 - k * .08, depthWrite: false }));
+    g.add(torus);
+    const coins = 4 + k * 2;
+    for (let c = 0; c < coins; c++) {
+      const coin = new THREE.Mesh(new THREE.CylinderGeometry(.16 - k * .02, .16 - k * .02, .035, 40), new THREE.MeshStandardMaterial({ color: 0xf2c66e, metalness: 1, roughness: .2, envMapIntensity: 2.2 }));
+      const a = c / coins * Math.PI * 2; coin.position.set(Math.cos(a) * r, Math.sin(a) * r, 0);
+      coin.userData = { a, r }; g.add(coin);
+    }
+    g.userData = { spd, coins: g.children }; rig.add(g); rings.push(g);
+  });
+  const sparks = motes(70, 5.2, 2.2, .1); scene.add(sparks);
+  rig.scale.setScalar(.6); rig.position.y = -.3;
+  const update = (dt, t) => {
+    crystal.rotation.y = edges.rotation.y = t * .5;
+    rig.rotation.y = pointer.x * .35; rig.rotation.x = pointer.y * .2;
+    rig.position.y = -.3 + Math.sin(t * .8) * .05;
+    rings.forEach(g => {
+      const { spd } = g.userData;
+      g.children.forEach(m => {
+        if (!m.userData.r) return;
+        const a = m.userData.a + t * spd; m.position.set(Math.cos(a) * m.userData.r, Math.sin(a) * m.userData.r, 0);
+        m.rotation.x = t * 1.4;
+      });
+    });
+    sparks.rotation.z = t * .02;
+  };
+  create(canvas, host, scene, camera, update);
+})();
 
 /* ==========================================================================
    2 · JOURNEY — a scroll-driven flight through golden gates, past drifting
@@ -227,14 +276,17 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
 }
 
 /* ==========================================================================
-   3 · UNIVERSE — golden particle sphere that melts into a helix on scroll
+   3 · UNIVERSE — living golden globe: rippling particle sphere, travelling
+   light along great-circle arcs between "cities", pulse rings, orbiting coins,
+   cursor ripple; melts into a helix on scroll.
    ========================================================================== */
 {
   const container = document.querySelector('.universe-visual');
   if (container) {
     const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(45, 1, .1, 100);
-    camera.position.z = 7.8;
-    const count = mobile() ? 700 : 1700;
+    camera.position.z = 7.8; lights(scene);
+    const globe = new THREE.Group(); scene.add(globe);
+    const count = mobile() ? 900 : 2200;
     const pos = new Float32Array(count * 3), origin = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const y = 1 - i / (count - 1) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963, k = i * 3;
@@ -246,30 +298,77 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
       map: dotTexture, color: 0xf6d98f, size: mobile() ? .09 : .1, transparent: true, opacity: .95,
       depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
     }));
-    scene.add(sphere);
-    const orbitA = halo(2.4, .5), orbitB = halo(2.62, .22);
+    globe.add(sphere);
+    /* faint latitude / longitude graticule */
+    const grat = new THREE.Group(); globe.add(grat);
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xe9c577, transparent: true, opacity: .14, depthWrite: false });
+    for (let i = -2; i <= 2; i++) {
+      const yy = i * .33, rr = Math.sqrt(1 - yy * yy) * 2.02, pts = [];
+      for (let k = 0; k <= 96; k++) { const a = k / 96 * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a) * rr, yy * 2.02, Math.sin(a) * rr)); }
+      grat.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
+    }
+    /* cities + arcs + travelling pulses */
+    const ll = (lat, lon, r = 2.04) => { const p = lat * Math.PI / 180, l = lon * Math.PI / 180; return new THREE.Vector3(Math.cos(p) * Math.cos(l) * r, Math.sin(p) * r, Math.cos(p) * Math.sin(l) * r); };
+    const cities = [[19, 72], [51, 0], [40, -74], [1, 103], [35, 139], [-33, 151], [25, 55], [-23, -46]].map(([a, b]) => ll(a, b));
+    const links = [[0, 1], [0, 3], [1, 2], [0, 6], [3, 4], [3, 5], [2, 7], [6, 1], [4, 2]];
+    const arcs = links.map(([i, j]) => {
+      const A = cities[i], B = cities[j], pts = [], n = 64, lift = .35 + A.angleTo(B) * .45;
+      for (let k = 0; k <= n; k++) { const t = k / n; pts.push(A.clone().lerp(B, t).normalize().multiplyScalar(2.04 + Math.sin(t * Math.PI) * lift)); }
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color: 0xf6d98f, transparent: true, opacity: .28, depthWrite: false, blending: THREE.AdditiveBlending }));
+      globe.add(line); return { pts, line, off: Math.random() };
+    });
+    const pulseGeo = new THREE.BufferGeometry(); pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arcs.length * 3), 3));
+    const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ map: dotTexture, color: 0xfff2cf, size: .34, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    globe.add(pulses);
+    const rings = cities.map(c => {
+      const m = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 48), new THREE.MeshBasicMaterial({ color: 0xf6d98f, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+      m.position.copy(c); m.lookAt(c.clone().multiplyScalar(2)); globe.add(m); return m;
+    });
+    const nodeDots = new THREE.Points(new THREE.BufferGeometry().setFromPoints(cities),
+      new THREE.PointsMaterial({ map: dotTexture, color: 0xffffff, size: .26, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    globe.add(nodeDots);
+    /* orbits with travelling coins */
+    const orbitA = halo(2.5, .5), orbitB = halo(2.78, .22);
     orbitA.rotation.x = 1.14; orbitB.rotation.y = 1.1; scene.add(orbitA, orbitB);
-    let progress = 0, hover = false, lastP = NaN, lastH = null;
+    const coinA = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .03, 36), gold()), coinB = coinA.clone();
+    scene.add(coinA, coinB);
+    let progress = 0, hover = false, hx = 0, hy = 0, hv = 0;
     const read = () => { const r = container.getBoundingClientRect(); progress = clamp((innerHeight - r.top) / (innerHeight + r.height)); };
     addEventListener('scroll', read, { passive: true }); read();
     container.addEventListener('pointerenter', () => hover = true);
     container.addEventListener('pointerleave', () => hover = false);
+    container.addEventListener('pointermove', e => { const r = container.getBoundingClientRect(); hx = (e.clientX - r.left) / r.width * 2 - 1; hy = -((e.clientY - r.top) / r.height * 2 - 1); }, { passive: true });
+    const tmp = new THREE.Vector3();
     const managed = create(document.getElementById('universe-canvas'), container, scene, camera, (dt, time) => {
-      if (progress !== lastP || hover !== lastH) {
-        const morph = smooth(.2, .85, progress), expand = hover ? .12 : 0;
-        for (let i = 0; i < count; i++) {
-          const k = i * 3, y = origin[k + 1], ang = y * 2.15 + i * .03, rad = 1.2 + Math.abs(y) * .2;
-          pos[k] = origin[k] * (1 - morph) * (1 + expand) + Math.cos(ang) * rad * morph;
-          pos[k + 1] = y * (1 + morph * .16 + expand);
-          pos[k + 2] = origin[k + 2] * (1 - morph) * (1 + expand) + Math.sin(ang) * rad * morph;
-        }
-        geo.attributes.position.needsUpdate = true; lastP = progress; lastH = hover;
+      const morph = smooth(.2, .85, progress); hv += ((hover ? 1 : 0) - hv) * .06;
+      const t = reduced ? 0 : time;
+      for (let i = 0; i < count; i++) {
+        const k = i * 3, ox = origin[k], oy = origin[k + 1], oz = origin[k + 2];
+        const wave = 1 + .045 * Math.sin(oy * 3.2 + t * 1.5) * Math.cos(Math.atan2(oz, ox) * 3 - t * .9) + hv * .08;
+        const ang = oy * 2.15 + i * .03 + t * .25 * morph, rad = 1.2 + Math.abs(oy) * .2;
+        pos[k] = ox * wave * (1 - morph) + Math.cos(ang) * rad * morph;
+        pos[k + 1] = oy * (1 + morph * .16) * (1 + hv * .08 * (1 - morph));
+        pos[k + 2] = oz * wave * (1 - morph) + Math.sin(ang) * rad * morph;
       }
+      geo.attributes.position.needsUpdate = true;
+      const keep = 1 - morph;
+      arcs.forEach((a, n) => {
+        a.line.material.opacity = .3 * keep;
+        const u = (t * .16 + a.off) % 1, idx = Math.floor(u * (a.pts.length - 1));
+        pulseGeo.attributes.position.setXYZ(n, ...a.pts[idx].toArray());
+      });
+      pulseGeo.attributes.position.needsUpdate = true; pulses.material.opacity = keep; nodeDots.material.opacity = keep; lineMat.opacity = .14 * keep;
+      rings.forEach((r, n) => { const u = ((t * .35 + n * .37) % 1); r.scale.setScalar(.06 + u * .3); r.material.opacity = (1 - u) * .55 * keep; });
       if (!reduced) {
-        sphere.rotation.y += dt * .14;
-        sphere.rotation.x += (-pointer.y * .25 - sphere.rotation.x) * .03;
+        globe.rotation.y += dt * .14;
+        globe.rotation.x += (-pointer.y * .25 - globe.rotation.x) * .03;
+        globe.rotation.z += ((hx * .12) - globe.rotation.z) * .03;
         orbitA.rotation.z += dt * .09; orbitB.rotation.x -= dt * .05;
       }
+      const a1 = t * .6, a2 = -t * .4 + 2;
+      tmp.set(Math.cos(a1) * 2.5, Math.sin(a1) * 2.5, 0).applyEuler(orbitA.rotation); coinA.position.copy(tmp); coinA.rotation.x = t * 1.5;
+      tmp.set(Math.cos(a2) * 2.78, Math.sin(a2) * 2.78, 0).applyEuler(orbitB.rotation); coinB.position.copy(tmp); coinB.rotation.z = t * 1.2;
       orbitA.scale.setScalar(1 + progress * .12); orbitB.scale.setScalar(1 + progress * .08);
     });
     if (managed && still) addEventListener('scroll', () => managed.render(), { passive: true });

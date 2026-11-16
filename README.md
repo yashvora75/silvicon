@@ -56,5 +56,5 @@ cursor glow. Respects `prefers-reduced-motion`.
 - Contact details are intentionally not invented; copy needs client and legal review.
 
 
-## Hero
-The hero uses a 2D canvas "golden silk" ribbon (`js/hero-silk.js`) with three glowing markers (Clarity / Growth / Value) that bends away from the cursor. The globe, journey and CTA sections keep their Three.js scenes (`js/scene.js`).
+## Hero & globe
+The hero is a Three.js faceted gold crystal with orbiting coin rings (`js/scene.js`). The globe is a rippling particle sphere with light travelling along great-circle arcs between cities, pulse rings and orbiting coins; it melts into a helix on scroll.
