@@ -85,7 +85,6 @@ if (reduce || !gsap || !ScrollTrigger) {
       .from('.hero .eyebrow', { opacity: 0, y: 18, letterSpacing: '.5em', duration: 1.6 }, 0)
       .from('.hero .eyebrow .line', { scaleX: 0, transformOrigin: '0 50%', duration: 1.4 }, .1)
       .from('#hero-chart', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
-      .from('.hero-emblem', { opacity: 0, scale: .6, y: 20, filter: 'blur(10px)', duration: 1.4, clearProps: 'filter,opacity' }, .6)
       .from('.hero-end > p, .hero-end .visual-label', { opacity: 0, y: 24, filter: 'blur(8px)', duration: 1.3, stagger: .12, clearProps: 'transform,opacity,filter' }, .7)
       .from('.hero-end .button', { opacity: 0, y: 30, scale: .88, duration: 1.2, stagger: .12, ease: 'back.out(1.6)', clearProps: 'transform,opacity' }, .95);
     if (!played) tl.from('.header-inner', { opacity: 0, y: -24, duration: 1 }, .2).from('.hero-foot', { opacity: 0, duration: 1 }, 1.2);
