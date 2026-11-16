@@ -452,3 +452,14 @@ dialog[open]{animation:dialogIn .5s var(--ease)}
 @media (max-width:760px){.universe-copy::before{background:radial-gradient(closest-side,rgba(6,18,32,.55),rgba(6,18,32,.3) 60%,transparent)}}
 .universe{padding-block:0}
 .universe-grid{min-height:calc(100svh - var(--foot))}
+
+/* why-us: always three cards in one row, scaling down on small screens */
+.why-nav{display:none!important}
+@media (max-width:999px){
+  .why-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;gap:clamp(8px,1.6vw,16px);overflow:visible;margin-inline:0;padding:0}
+  .why-grid article{display:flex;flex-direction:column;align-items:flex-start;min-height:0;height:100%;padding:clamp(14px,2.4vw,28px);scroll-snap-align:none}
+  .why-grid svg{width:clamp(26px,4vw,40px);height:clamp(26px,4vw,40px);margin:0 0 clamp(14px,3vw,28px)}
+  .why-grid h3{font-size:clamp(17px,3vw,28px);line-height:1.15;margin-bottom:8px;overflow-wrap:anywhere;hyphens:auto}
+  .why-grid p{font-size:clamp(11.5px,1.7vw,14px);line-height:1.55}
+  .why-num{font-size:10px;top:clamp(14px,2.4vw,28px);right:clamp(12px,2vw,24px)}
+}
