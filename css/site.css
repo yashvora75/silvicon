@@ -400,3 +400,13 @@ dialog[open]{animation:dialogIn .5s var(--ease)}
 .amb::after{content:"";position:absolute;inset:0;opacity:.05;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 @media (max-width:760px){.amb-rosette{opacity:.14}.amb-blob{filter:blur(50px)}}
 .cta-visual{opacity:.6}
+
+/* services wheel (desktop): pinned stage, cards sit on a half circle */
+@media (min-width:1000px){
+  .services.arc-on{min-height:100vh;padding-block:clamp(72px,9vh,110px) 0;overflow:hidden}
+  .services.arc-on .section-head{margin-bottom:0}
+  .service-arc{position:relative;display:block;height:clamp(430px,58vh,560px);margin-top:clamp(12px,3vh,36px)}
+  .service-arc .service-card{position:absolute;left:50%;top:0;width:min(460px,38vw);height:clamp(380px,50vh,460px);margin-left:calc(min(460px,38vw)/-2);transform-origin:50% 140%;min-height:0}
+  .service-arc .service-card.is-active{border-color:rgba(241,213,157,.7);box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 60px rgba(241,200,120,.12)}
+  .service-arc::before{content:"";position:absolute;left:50%;top:-4%;width:min(1500px,130vw);aspect-ratio:1;transform:translateX(-50%);border:1px dashed rgba(241,213,157,.14);border-radius:50%;pointer-events:none}
+}

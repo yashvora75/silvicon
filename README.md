@@ -56,5 +56,8 @@ cursor glow. Respects `prefers-reduced-motion`.
 - Contact details are intentionally not invented; copy needs client and legal review.
 
 
-## Hero & globe
-The hero is a Three.js faceted gold crystal with orbiting coin rings (`js/scene.js`). The globe is a rippling particle sphere with light travelling along great-circle arcs between cities, pulse rings and orbiting coins; it melts into a helix on scroll.
+## Hero, globe, services
+- Hero: animated growth line chart (`js/hero-chart.js`, Canvas 2D) drawing bottom-left to top-right with light travelling along it; works on mobile.
+- Globe: rippling particle sphere, comet-trail arcs between cities, pulse rings, orbiting coins.
+- Services: pinned half-circle wheel on desktop (>=1000px), scroll rotates cards; stacked cards on smaller screens.
+- Why / CTA: multi-layer parallax.

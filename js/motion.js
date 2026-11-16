@@ -71,7 +71,7 @@ if (reduce || !gsap || !ScrollTrigger) {
       y: 56, opacity: 0, scale: .97, duration: 1, ease: 'power3.out', stagger: .12, clearProps: 'transform,opacity', ...vars
     })
   });
-  stagger('.service-card'); stagger('.why-grid article', { scale: 1 }); stagger('.universe-list li', { y: 24, scale: 1, stagger: .1 });
+  if (innerWidth < 1000 || reduce) stagger('.service-card'); stagger('.why-grid article', { scale: 1 }); stagger('.universe-list li', { y: 24, scale: 1, stagger: .1 });
 
   /* ---------- hero entrance (after the intro settles) ---------- */
   let heroDone = false;
@@ -83,7 +83,7 @@ if (reduce || !gsap || !ScrollTrigger) {
     const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
     tl.to('.hero .mask>span', { yPercent: 0, duration: 1.3, stagger: .12, clearProps: 'transform' }, 0)
       .from('.hero .eyebrow', { opacity: 0, y: 14, duration: .9 }, 0)
-      .from('#hero-3d', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
+      .from('#hero-chart', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
       .from('.hero-end > *', { opacity: 0, y: 26, duration: 1, stagger: .1, clearProps: 'transform,opacity' }, .55);
     if (!played) tl.from('.header-inner', { opacity: 0, y: -24, duration: 1 }, .2).from('.hero-foot', { opacity: 0, duration: 1 }, 1.2);
   };
@@ -93,7 +93,7 @@ if (reduce || !gsap || !ScrollTrigger) {
 
   /* hero parallax on scroll */
   const heroScroll = { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true };
-  gsap.to('#hero-3d', { yPercent: -10, ease: 'none', scrollTrigger: heroScroll });
+  gsap.to('#hero-chart', { yPercent: -10, ease: 'none', scrollTrigger: heroScroll });
   gsap.to('.hero-glow', { yPercent: -18, opacity: .4, ease: 'none', scrollTrigger: heroScroll });
 
   /* ---------- journey: beat copy + dots ---------- */
@@ -166,6 +166,25 @@ if (reduce || !gsap || !ScrollTrigger) {
     gsap.from('.cta-wave', { yPercent: 20, ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'center center', scrub: true } });
   }
 
+
+  /* ---------- multi-layer parallax: Why + CTA ---------- */
+  if (!reduce) {
+    const lay = (sel, from, to, trig, extra = {}) => document.querySelectorAll(sel).length && gsap.fromTo(sel, { yPercent: from, ...extra.from }, {
+      yPercent: to, ease: 'none', ...extra.to, scrollTrigger: { trigger: trig, start: 'top bottom', end: 'bottom top', scrub: .6 }
+    });
+    /* Why: background drifts slowest, header floats up, each card travels at its own speed */
+    lay('#why .amb', -14, 14, '#why');
+    lay('#why .section-head', 14, -14, '#why');
+    ['1', '2', '3'].forEach((n, i) => lay(`#why .why-grid article:nth-child(${n})`, [18, 4, 26][i], [-10, -22, -4][i], '#why'));
+    lay('#why .why-grid article i', 30, -30, '#why');
+    /* CTA: layered depth — rings + wave behind, copy ahead, button last */
+    lay('.cta .cta-inner .eyebrow', 40, -40, '.cta');
+    lay('.cta .cta-inner h2', 22, -22, '.cta');
+    lay('.cta .cta-inner > p:not(.eyebrow)', 12, -12, '.cta');
+    lay('.cta .cta-inner .button', 6, -6, '.cta');
+    gsap.fromTo('.cta-inner', { scale: .94, opacity: .2 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top 95%', end: 'top 35%', scrub: true } });
+  }
+
   /* ---------- pointer-driven polish (mouse only) ---------- */
   if (fine) {
     const glow = document.querySelector('.cursor-glow');
@@ -190,7 +209,7 @@ if (reduce || !gsap || !ScrollTrigger) {
     });
 
     /* 3D tilt + spotlight on service cards */
-    $('.service-card').forEach(card => {
+    if (innerWidth < 1000) $('.service-card').forEach(card => {
       const rx = gsap.quickTo(card, 'rotationX', { duration: .6, ease: 'power3' });
       const ry = gsap.quickTo(card, 'rotationY', { duration: .6, ease: 'power3' });
       gsap.set(card, { transformPerspective: 900 });
@@ -201,6 +220,39 @@ if (reduce || !gsap || !ScrollTrigger) {
       });
       card.addEventListener('pointerleave', () => { rx(0); ry(0); });
     });
+  }
+
+
+  /* ---------- services: cards ride a half-circle wheel as you scroll ---------- */
+  {
+    const grid = document.querySelector('.service-grid'), cards = $('.service-card');
+    if (grid && cards.length && !reduce) {
+      const mmArc = gsap.matchMedia();
+      mmArc.add('(min-width: 1000px)', () => {
+        const section = document.querySelector('#services'), n = cards.length;
+        section.classList.add('arc-on'); grid.classList.add('service-arc');
+        const state = { p: 0 };
+        const place = () => {
+          const R = Math.min(innerWidth * .62, 980), step = 34;
+          cards.forEach((c, i) => {
+            const th = (i - state.p * (n - 1)) * step, rad = th * Math.PI / 180, a = Math.abs(th);
+            const hide = a > 78;
+            gsap.set(c, {
+              x: Math.sin(rad) * R, y: (1 - Math.cos(rad)) * R * .72, rotation: th * .9, scale: 1 - Math.min(a, 70) / 70 * .22,
+              opacity: hide ? 0 : 1 - Math.min(a, 78) / 78 * .85, zIndex: 100 - Math.round(a), pointerEvents: a < 18 ? 'auto' : 'none', force3D: true
+            });
+            c.classList.toggle('is-active', a < 18);
+          });
+        };
+        place();
+        const st = ScrollTrigger.create({
+          trigger: section, start: 'top top', end: () => '+=' + innerHeight * 2.4, pin: true, scrub: .8, anticipatePin: 1,
+          onUpdate: self => { gsap.to(state, { p: self.progress, duration: .6, ease: 'power3.out', overwrite: true, onUpdate: place }); }
+        });
+        addEventListener('resize', place);
+        return () => { st.kill(); removeEventListener('resize', place); section.classList.remove('arc-on'); grid.classList.remove('service-arc'); gsap.set(cards, { clearProps: 'all' }); };
+      });
+    }
   }
 
   /* layout settles after fonts/images */

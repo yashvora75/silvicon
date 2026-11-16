@@ -109,55 +109,6 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
 }
 
 /* ==========================================================================
-   1 · HERO — a faceted gold crystal wrapped by orbiting coin rings
-   ========================================================================== */
-(() => {
-  const canvas = document.getElementById('hero-3d'), host = document.querySelector('.hero');
-  if (!canvas || !host) return;
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, 1, .1, 60); camera.position.set(0, 0, 9);
-  lights(scene);
-  const rig = new THREE.Group(); scene.add(rig);
-  const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(.78, 0),
-    new THREE.MeshStandardMaterial({ color: 0xf2c66e, metalness: 1, roughness: .12, envMapIntensity: 2.4, flatShading: true }));
-  crystal.scale.y = 1.35; rig.add(crystal);
-  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(.9, 0)),
-    new THREE.LineBasicMaterial({ color: 0xfff1c9, transparent: true, opacity: .55 }));
-  edges.scale.y = 1.35; rig.add(edges);
-  const rings = [];
-  [[1.35, .0, .5], [1.8, .6, -.35], [2.3, -.5, .25]].forEach(([r, tilt, spd], k) => {
-    const g = new THREE.Group(); g.rotation.x = Math.PI / 2 + tilt * .4; g.rotation.z = tilt;
-    const torus = new THREE.Mesh(new THREE.TorusGeometry(r, .012, 6, 200),
-      new THREE.MeshBasicMaterial({ color: 0xf4d391, transparent: true, opacity: .45 - k * .08, depthWrite: false }));
-    g.add(torus);
-    const coins = 4 + k * 2;
-    for (let c = 0; c < coins; c++) {
-      const coin = new THREE.Mesh(new THREE.CylinderGeometry(.16 - k * .02, .16 - k * .02, .035, 40), new THREE.MeshStandardMaterial({ color: 0xf2c66e, metalness: 1, roughness: .2, envMapIntensity: 2.2 }));
-      const a = c / coins * Math.PI * 2; coin.position.set(Math.cos(a) * r, Math.sin(a) * r, 0);
-      coin.userData = { a, r }; g.add(coin);
-    }
-    g.userData = { spd, coins: g.children }; rig.add(g); rings.push(g);
-  });
-  const sparks = motes(70, 5.2, 2.2, .1); scene.add(sparks);
-  rig.scale.setScalar(.6); rig.position.y = -.3;
-  const update = (dt, t) => {
-    crystal.rotation.y = edges.rotation.y = t * .5;
-    rig.rotation.y = pointer.x * .35; rig.rotation.x = pointer.y * .2;
-    rig.position.y = -.3 + Math.sin(t * .8) * .05;
-    rings.forEach(g => {
-      const { spd } = g.userData;
-      g.children.forEach(m => {
-        if (!m.userData.r) return;
-        const a = m.userData.a + t * spd; m.position.set(Math.cos(a) * m.userData.r, Math.sin(a) * m.userData.r, 0);
-        m.rotation.x = t * 1.4;
-      });
-    });
-    sparks.rotation.z = t * .02;
-  };
-  create(canvas, host, scene, camera, update);
-})();
-
-/* ==========================================================================
    2 · JOURNEY — a scroll-driven flight through golden gates, past drifting
    coins, ending at a rising sun with a growth chart
    ========================================================================== */
@@ -318,9 +269,12 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
         new THREE.LineBasicMaterial({ color: 0xf6d98f, transparent: true, opacity: .28, depthWrite: false, blending: THREE.AdditiveBlending }));
       globe.add(line); return { pts, line, off: Math.random() };
     });
-    const pulseGeo = new THREE.BufferGeometry(); pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arcs.length * 3), 3));
-    const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ map: dotTexture, color: 0xfff2cf, size: .34, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const TR = 8, PER = 2, pulseN = arcs.length * PER * TR;
+    const pulseGeo = new THREE.BufferGeometry(); pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pulseN * 3), 3));
+    const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ map: dotTexture, color: 0xfff2cf, size: .3, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
     globe.add(pulses);
+    const shock = new THREE.Mesh(new THREE.SphereGeometry(2, 48, 24), new THREE.MeshBasicMaterial({ color: 0xf6d98f, transparent: true, opacity: 0, wireframe: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    scene.add(shock);
     const rings = cities.map(c => {
       const m = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 48), new THREE.MeshBasicMaterial({ color: 0xf6d98f, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
       m.position.copy(c); m.lookAt(c.clone().multiplyScalar(2)); globe.add(m); return m;
@@ -345,7 +299,7 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
       const t = reduced ? 0 : time;
       for (let i = 0; i < count; i++) {
         const k = i * 3, ox = origin[k], oy = origin[k + 1], oz = origin[k + 2];
-        const wave = 1 + .045 * Math.sin(oy * 3.2 + t * 1.5) * Math.cos(Math.atan2(oz, ox) * 3 - t * .9) + hv * .08;
+        const wave = 1 + .07 * Math.sin(oy * 3.2 + t * 2.2) * Math.cos(Math.atan2(oz, ox) * 3 - t * 1.3) + .03 * Math.sin(oy * 9 - t * 3) + hv * .08;
         const ang = oy * 2.15 + i * .03 + t * .25 * morph, rad = 1.2 + Math.abs(oy) * .2;
         pos[k] = ox * wave * (1 - morph) + Math.cos(ang) * rad * morph;
         pos[k + 1] = oy * (1 + morph * .16) * (1 + hv * .08 * (1 - morph));
@@ -355,13 +309,15 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
       const keep = 1 - morph;
       arcs.forEach((a, n) => {
         a.line.material.opacity = .3 * keep;
-        const u = (t * .16 + a.off) % 1, idx = Math.floor(u * (a.pts.length - 1));
-        pulseGeo.attributes.position.setXYZ(n, ...a.pts[idx].toArray());
+        for (let c = 0; c < PER; c++) for (let q = 0; q < TR; q++) {
+          const u = ((t * .3 + a.off + c / PER - q * .012) % 1 + 1) % 1, idx = Math.floor(u * (a.pts.length - 1)), j = (n * PER + c) * TR + q;
+          pulseGeo.attributes.position.setXYZ(j, ...a.pts[idx].toArray());
+        }
       });
       pulseGeo.attributes.position.needsUpdate = true; pulses.material.opacity = keep; nodeDots.material.opacity = keep; lineMat.opacity = .14 * keep;
       rings.forEach((r, n) => { const u = ((t * .35 + n * .37) % 1); r.scale.setScalar(.06 + u * .3); r.material.opacity = (1 - u) * .55 * keep; });
       if (!reduced) {
-        globe.rotation.y += dt * .14;
+        globe.rotation.y += dt * .26;
         globe.rotation.x += (-pointer.y * .25 - globe.rotation.x) * .03;
         globe.rotation.z += ((hx * .12) - globe.rotation.z) * .03;
         orbitA.rotation.z += dt * .09; orbitB.rotation.x -= dt * .05;
@@ -369,6 +325,7 @@ function motes(count, spreadX = 3.4, spreadY = 2.4, size = .16) {
       const a1 = t * .6, a2 = -t * .4 + 2;
       tmp.set(Math.cos(a1) * 2.5, Math.sin(a1) * 2.5, 0).applyEuler(orbitA.rotation); coinA.position.copy(tmp); coinA.rotation.x = t * 1.5;
       tmp.set(Math.cos(a2) * 2.78, Math.sin(a2) * 2.78, 0).applyEuler(orbitB.rotation); coinB.position.copy(tmp); coinB.rotation.z = t * 1.2;
+      { const u = (t * .22) % 1; shock.scale.setScalar(.9 + u * .55); shock.material.opacity = (1 - u) * .12 * keep; shock.rotation.y = t * .2; }
       orbitA.scale.setScalar(1 + progress * .12); orbitB.scale.setScalar(1 + progress * .08);
     });
     if (managed && still) addEventListener('scroll', () => managed.render(), { passive: true });
