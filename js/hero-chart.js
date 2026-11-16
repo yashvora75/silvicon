@@ -61,10 +61,6 @@
         ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(h[0], h[1], r, 0, 7); ctx.fill();
       }
     }
-    /* end marker + pulse */
-    const p = at(draw01);
-    ctx.fillStyle = '#fff1c9'; ctx.beginPath(); ctx.arc(Math.min(p[0], W - 8), p[1], small() ? 4 : 5.5, 0, 7); ctx.fill();
-    const q = (t * .6) % 1; ctx.strokeStyle = `rgba(255,236,190,${(1 - q) * .7})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p[0], p[1], 6 + q * 26, 0, 7); ctx.stroke();
     /* data dots */
     for (let i = 14; i <= last; i += small() ? 30 : 22) { ctx.fillStyle = 'rgba(255,236,190,.85)'; ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 2.6, 0, 7); ctx.fill(); }
   };

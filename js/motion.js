@@ -85,6 +85,7 @@ if (reduce || !gsap || !ScrollTrigger) {
       .from('.hero .eyebrow', { opacity: 0, y: 18, letterSpacing: '.5em', duration: 1.6 }, 0)
       .from('.hero .eyebrow .line', { scaleX: 0, transformOrigin: '0 50%', duration: 1.4 }, .1)
       .from('#hero-chart', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
+      .from('.hero-emblem', { opacity: 0, scale: .6, y: 20, filter: 'blur(10px)', duration: 1.4, clearProps: 'filter,opacity' }, .6)
       .from('.hero-end > p, .hero-end .visual-label', { opacity: 0, y: 24, filter: 'blur(8px)', duration: 1.3, stagger: .12, clearProps: 'transform,opacity,filter' }, .7)
       .from('.hero-end .button', { opacity: 0, y: 30, scale: .88, duration: 1.2, stagger: .12, ease: 'back.out(1.6)', clearProps: 'transform,opacity' }, .95);
     if (!played) tl.from('.header-inner', { opacity: 0, y: -24, duration: 1 }, .2).from('.hero-foot', { opacity: 0, duration: 1 }, 1.2);
@@ -163,6 +164,21 @@ if (reduce || !gsap || !ScrollTrigger) {
     });
   }
 
+
+  /* ---------- why-us: below 1000px the cards form a horizontal carousel that slides as you scroll down ---------- */
+  {
+    const grid = document.querySelector('.why-grid'), sec = document.querySelector('#why');
+    if (grid && sec && !reduce) {
+      const mmWhy = gsap.matchMedia();
+      mmWhy.add('(max-width: 999px)', () => {
+        const dist = () => Math.max(0, grid.scrollWidth - (grid.parentElement.clientWidth));
+        const tw = gsap.to(grid, { x: () => -dist(), ease: 'none', scrollTrigger: {
+          trigger: sec, start: 'top top', end: () => '+=' + (dist() + innerHeight * .4), pin: true, scrub: .6, anticipatePin: 1, invalidateOnRefresh: true, refreshPriority: 9 } });
+        return () => { tw.scrollTrigger && tw.scrollTrigger.kill(); tw.kill(); gsap.set(grid, { clearProps: 'transform' }); };
+      });
+    }
+  }
+
   /* ---------- CTA parallax ---------- */
   if (document.querySelector('.cta')) {
     gsap.fromTo('.cta-visual', { scale: 1, yPercent: 4 }, {
@@ -181,8 +197,8 @@ if (reduce || !gsap || !ScrollTrigger) {
     /* Why: background drifts slowest, header floats up, each card travels at its own speed */
     lay('#why .amb', -14, 14, '#why');
     lay('#why .section-head', 14, -14, '#why');
-    ['1', '2', '3'].forEach((n, i) => lay(`#why .why-grid article:nth-child(${n})`, [18, 4, 26][i], [-10, -22, -4][i], '#why'));
-    lay('#why .why-grid article i', 30, -30, '#why');
+    if (innerWidth >= 1000) ['1', '2', '3'].forEach((n, i) => lay(`#why .why-grid article:nth-child(${n})`, [18, 4, 26][i], [-10, -22, -4][i], '#why'));
+    if (innerWidth >= 1000) lay('#why .why-grid article i', 30, -30, '#why');
     /* CTA: layered depth — rings + wave behind, copy ahead, button last */
     lay('.cta .cta-inner .eyebrow', 40, -40, '.cta');
     lay('.cta .cta-inner h2', 22, -22, '.cta');
