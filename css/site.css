@@ -454,3 +454,6 @@ dialog[open]{animation:dialogIn .5s var(--ease)}
 @keyframes emblemFloat{50%{transform:translateY(-6px);filter:drop-shadow(0 0 32px rgba(245,200,111,.7))}}
 @media (max-height:760px){.hero-emblem{width:44px;margin-top:10px}}
 .hero-visual{height:clamp(150px,21vh,270px)}
+.hero-emblem{width:clamp(84px,12.5vh,140px);margin-top:clamp(12px,2vh,22px)}
+.hero-visual{height:clamp(56px,8vh,120px)}
+@media (max-height:700px){.hero-emblem{width:72px}}
