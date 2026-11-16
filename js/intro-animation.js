@@ -92,7 +92,7 @@ function finish({ skipped = false } = {}) {
 }
 function start({ replaying = false } = {}) {
   if (active) finish({skipped:true});
-  if (!motionAllowed()) return;
+  // plays on every load, regardless of reduced-motion preference
   if (replaying) window.scrollTo({ top: 0, behavior: 'instant' });
   active = true; previousFocus = replaying ? null : document.activeElement;
   overlay.classList.add('active'); overlay.removeAttribute('aria-hidden'); document.body.classList.add('intro-playing');
@@ -126,4 +126,7 @@ function start({ replaying = false } = {}) {
 }
 skip.addEventListener('click',() => finish({skipped:true}));
 replay.addEventListener('click',() => start({replaying:true}));
-if (!hasPlayed() && motionAllowed()) start(); else settle(false);
+try { history.scrollRestoration = 'manual'; } catch {}
+scrollTo(0, 0);
+addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
+start();

@@ -12,11 +12,11 @@
 
   const build = () => {
     const N = small() ? 90 : 160; pts = [];
-    const y0 = small() ? .9 : .88, y1 = small() ? .34 : .26, padX = small() ? 0 : .02;
+    const y0 = small() ? .8 : .88, y1 = small() ? .3 : .26, padX = 0;
     for (let i = 0; i <= N; i++) {
       const u = i / N, trend = y0 + (y1 - y0) * (u * .72 + .28 * Math.pow(u, 1.8));
       const wob = Math.sin(u * 17) * .022 + Math.sin(u * 33 + 1.3) * .011 + Math.sin(u * 7 + .4) * .03 * (1 - u * .4);
-      pts.push([(padX + u * (1 - padX * 2)) * W, (trend - wob * (.4 + u * .6)) * H]);
+      pts.push([(-.01 + u * 1.02) * W, (trend - wob * (.4 + u * .6)) * H]);
     }
   };
   const resize = () => {
@@ -42,7 +42,7 @@
     const fill = ctx.createLinearGradient(0, H * .25, 0, H); fill.addColorStop(0, 'rgba(233,197,119,.22)'); fill.addColorStop(1, 'rgba(233,197,119,0)');
     ctx.fillStyle = fill; ctx.fill();
     /* line */
-    const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, 'rgba(201,161,90,.15)'); g.addColorStop(.35, 'rgba(214,176,100,.75)'); g.addColorStop(1, 'rgba(255,236,190,1)');
+    const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, 'rgba(201,161,90,.55)'); g.addColorStop(.35, 'rgba(214,176,100,.75)'); g.addColorStop(1, 'rgba(255,236,190,1)');
     path(); ctx.strokeStyle = g; ctx.lineWidth = small() ? 2 : 2.6; ctx.lineJoin = 'round'; ctx.shadowColor = 'rgba(241,200,120,.7)'; ctx.shadowBlur = 14; ctx.stroke(); ctx.shadowBlur = 0;
     /* travelling light */
     const run = still ? .72 : ((t - 3) * .28) % 1.35;
@@ -63,7 +63,7 @@
     }
     /* end marker + pulse */
     const p = at(draw01);
-    ctx.fillStyle = '#fff1c9'; ctx.beginPath(); ctx.arc(p[0], p[1], small() ? 4 : 5.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff1c9'; ctx.beginPath(); ctx.arc(Math.min(p[0], W - 8), p[1], small() ? 4 : 5.5, 0, 7); ctx.fill();
     const q = (t * .6) % 1; ctx.strokeStyle = `rgba(255,236,190,${(1 - q) * .7})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p[0], p[1], 6 + q * 26, 0, 7); ctx.stroke();
     /* data dots */
     for (let i = 14; i <= last; i += small() ? 30 : 22) { ctx.fillStyle = 'rgba(255,236,190,.85)'; ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 2.6, 0, 7); ctx.fill(); }

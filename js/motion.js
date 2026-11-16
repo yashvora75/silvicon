@@ -78,13 +78,15 @@ if (reduce || !gsap || !ScrollTrigger) {
   const heroIn = () => {
     if (heroDone) return; heroDone = true;
     const played = window.silviconIntroSettled?.played;
-    gsap.set('.hero .mask>span', { yPercent: 118 });
+    gsap.set('.hero .mask>span', { yPercent: 110, skewY: 6, opacity: 0, filter: 'blur(14px)', transformOrigin: '0% 100%' });
     root.classList.add('hero-ready');
-    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-    tl.to('.hero .mask>span', { yPercent: 0, duration: 1.3, stagger: .12, clearProps: 'transform' }, 0)
-      .from('.hero .eyebrow', { opacity: 0, y: 14, duration: .9 }, 0)
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    tl.to('.hero .mask>span', { yPercent: 0, skewY: 0, opacity: 1, filter: 'blur(0px)', duration: 1.7, stagger: .16, clearProps: 'transform,filter,opacity' }, 0)
+      .from('.hero .eyebrow', { opacity: 0, y: 18, letterSpacing: '.5em', duration: 1.6 }, 0)
+      .from('.hero .eyebrow .line', { scaleX: 0, transformOrigin: '0 50%', duration: 1.4 }, .1)
       .from('#hero-chart', { opacity: 0, duration: 2.4, ease: 'power2.out' }, .1)
-      .from('.hero-end > *', { opacity: 0, y: 26, duration: 1, stagger: .1, clearProps: 'transform,opacity' }, .55);
+      .from('.hero-end > p, .hero-end .visual-label', { opacity: 0, y: 24, filter: 'blur(8px)', duration: 1.3, stagger: .12, clearProps: 'transform,opacity,filter' }, .7)
+      .from('.hero-end .button', { opacity: 0, y: 30, scale: .88, duration: 1.2, stagger: .12, ease: 'back.out(1.6)', clearProps: 'transform,opacity' }, .95);
     if (!played) tl.from('.header-inner', { opacity: 0, y: -24, duration: 1 }, .2).from('.hero-foot', { opacity: 0, duration: 1 }, 1.2);
   };
   if (window.silviconIntroSettled) heroIn();
@@ -147,13 +149,17 @@ if (reduce || !gsap || !ScrollTrigger) {
     const scrub = { trigger: '.timeline', start: 'top 72%', end: 'bottom 62%', scrub: .6 };
     mm.add('(min-width:761px)', () => { gsap.fromTo('.timeline-line span', { width: '0%' }, { width: '100%', ease: 'none', scrollTrigger: scrub }); });
     mm.add('(max-width:760px)', () => { gsap.fromTo('.timeline-line span', { height: '0%' }, { height: '100%', ease: 'none', scrollTrigger: scrub }); });
-    $('.timeline article').forEach(step => {
+    /* each step wakes up as the gold line reaches it: number, dot, title and copy glide in */
+    const steps = $('.timeline article');
+    steps.forEach((step, i) => {
+      const parts = step.querySelectorAll('.step-num, h3, p');
+      gsap.set(parts, { opacity: .18, y: 22 });
+      gsap.set(step.querySelector('.step-dot'), { scale: .6, opacity: .4 });
       ScrollTrigger.create({
-        trigger: step, start: 'top 70%',
-        onEnter: () => step.classList.add('spatial-active'),
-        onLeaveBack: () => step.classList.remove('spatial-active')
+        trigger: step, start: 'top 72%',
+        onEnter: () => { step.classList.add('spatial-active'); gsap.to(parts, { opacity: 1, y: 0, duration: .9, stagger: .09, ease: 'power3.out', overwrite: true }); gsap.to(step.querySelector('.step-dot'), { opacity: 1, duration: .5 }); },
+        onLeaveBack: () => { step.classList.remove('spatial-active'); gsap.to(parts, { opacity: .18, y: 22, duration: .5, overwrite: true }); gsap.to(step.querySelector('.step-dot'), { opacity: .4, duration: .4 }); }
       });
-      gsap.from(step, { y: 36, opacity: 0, duration: .9, ease: 'power3.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: step, start: 'top 90%', once: true } });
     });
   }
 
@@ -246,7 +252,7 @@ if (reduce || !gsap || !ScrollTrigger) {
         };
         place();
         const st = ScrollTrigger.create({
-          trigger: section, start: 'top top', end: () => '+=' + innerHeight * 2.4, pin: true, scrub: .8, anticipatePin: 1,
+          trigger: section, start: 'top top', end: () => '+=' + innerHeight * 2.4, pin: true, scrub: .8, anticipatePin: 1, refreshPriority: 10,
           onUpdate: self => { gsap.to(state, { p: self.progress, duration: .6, ease: 'power3.out', overwrite: true, onUpdate: place }); }
         });
         addEventListener('resize', place);

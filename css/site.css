@@ -105,7 +105,7 @@ em{font-style:italic;font-weight:400;color:var(--bright)}
 .hero h1:focus,.hero h1:focus-visible{outline:none}
 .mask{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
 .mask>span{display:inline-block}
-.js:not(.hero-ready) .hero .mask>span{transform:translateY(115%)}
+.js:not(.hero-ready) .hero .mask>span{transform:translateY(115%);opacity:0}
 .hero h1 em{position:relative;color:transparent;background:linear-gradient(100deg,#c9a15a 0%,#f1d59d 35%,#fff3d2 50%,#f1d59d 65%,#c9a15a 100%) 0 0/220% 100%;-webkit-background-clip:text;background-clip:text;animation:shimmer 7s linear infinite}
 @keyframes shimmer{to{background-position:-220% 0}}
 .hero h1 .mask:last-child{position:relative}
